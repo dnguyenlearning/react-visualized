@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useReducer, useMemo, useEffect } from 'react';
 import { columns, rows } from "./data";
 import { Column, Table } from 'react-virtualized';
 import 'react-virtualized/styles.css';
@@ -8,16 +8,45 @@ function findSelected(selectedCells, row) {
     return _.some(selectedCells, row)
 }
 
-function Cell({ value, onClick, defaultClick }) {
+const initialState = {
+    selectedCells: []
+};
+
+function reducer(state, action) {
+    console.log("action", action)
+  switch (action.type) {
+    case 'select':
+      return {selectedCells: action.selectedCells};
+    case 'reset':
+      return {selectedCells: action.selectedCells};
+    default:
+      throw new Error();
+  }
+}
+ 
+
+function Cell({ value, columnIndex, rowIndex }) {
+    const [state, dispatch] = useReducer(reducer, initialState)
+    const [selected, setSelected] = useState(false);
+
+    useEffect(()=>{
+        console.log("selectedCells", state.selectedCells);
+        setSelected(findSelected(state.selectedCells, {rowIndex, columnIndex}))
+    },[state.selectedCells, columnIndex, rowIndex])
+
+    console.log('render')
     const handleCellClick = (e) => {
-        onClick(e)
+        console.log(e.ctrlKey, state.selectedCells)
+        if (e.ctrlKey && state.selectedCells.length !== 0) {
+            const selectedCellsCoppied = [...state.selectedCells,  {rowIndex, columnIndex}]
+            console.log('selectedCellsCoppied', selectedCellsCoppied)
+            dispatch({type: 'select', selectedCells: selectedCellsCoppied})
+        } else {
+            dispatch({type: 'reset', selectedCells: [{rowIndex, columnIndex}]})
+        }
     }
     return <span
-        style={{
-            color: "red",
-            border: (defaultClick) ? '1px solid black' : ''
-        }}
-
+        className={selected? 'selected': ""}
         onClick={handleCellClick}
     >{value}</span>
 }
@@ -26,27 +55,19 @@ function App() {
     let [selectedCells, setSelectedCells] = useState([]);
 
     const handleSelectedChange = (e, { rowIndex, columnIndex }) => {
-        if (e.ctrlKey && selectedCells.length !== 0) {
-            setSelectedCells([...selectedCells, {
-                rowIndex, columnIndex
-            }])
-        } else {
-            setSelectedCells([]);
-            setSelectedCells([{
-                rowIndex, columnIndex
-            }])
-        }
+        
     }
 
-    return <div>
+    return <div className="app">
         <h1>This is example of {rows.length} ROWS and {columns.length} COLUMNS</h1>  
         <Table
-            width={999999}
+            width={9999999}
             height={1000}
-            headerHeight={20}
-            rowHeight={30}
+            headerHeight={50}
+            rowHeight={50}
             rowCount={rows.length}
             rowGetter={({ index }) => rows[index]}
+            className={'override'}
         >
             {columns.map(column => {
                 return <Column
@@ -57,8 +78,10 @@ function App() {
                     cellRenderer={({ cellData, rowIndex, columnIndex }) => {
                         return <Cell
                             value={cellData}
-                            defaultClick={findSelected(selectedCells, { rowIndex, columnIndex })}
-                            onClick={(e) => handleSelectedChange(e, { rowIndex, columnIndex })}
+                            rowIndex={rowIndex}
+                            columnIndex={columnIndex}
+                            // defaultClick={findSelected(selectedCells, { rowIndex, columnIndex })}
+                            onClick={(e) =>console.log('hehe')}
                         />
                     }}
                 />

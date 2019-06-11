@@ -1,5 +1,5 @@
-const columnsLength = 100;
-const rowsLength = 1000;
+const columnsLength = 15;
+const rowsLength = 40;
 
 function generateColumns() {
     let arr = [];
@@ -12,10 +12,10 @@ function generateColumns() {
     return arr;
 }
 
-function generateObj(column){
+function generateObj(row){
     let Obj = {};
     for (let i = 0; i < columnsLength; i++) {
-        Obj[`key${i}`] = `value[row${i}][column${column}]`;
+        Obj[`key${i}`] = `value[row${row}][column${i}]`;
     }
     return Obj;
 }
