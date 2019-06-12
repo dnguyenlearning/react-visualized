@@ -16,6 +16,12 @@ body{
       color: white;
       margin-top: 20px;
     }
+    svg{
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10000;
+    }
     .ReactVirtualized__Table{
       width: fit-content !important;
       // border-radius: 10px;

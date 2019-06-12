@@ -1,93 +1,127 @@
-import React, { useState, useReducer, useMemo, useEffect } from 'react';
-import { columns, rows } from "./data";
-import { Column, Table } from 'react-virtualized';
+import React, { Component } from 'react';
+import { columns, rows, generateMoreRows } from "./data";
+import { Column, Table, InfiniteLoader } from 'react-virtualized';
 import 'react-virtualized/styles.css';
-import * as _ from "lodash";
+import { ReactComponent as Spinner } from './images/spinner200px.svg';
 
 function findSelected(selectedCells, row) {
-    return _.some(selectedCells, row)
+    return selectedCells.hasOwnProperty(`${row.rowIndex}${row.columnIndex}`)
 }
 
-const initialState = {
-    selectedCells: []
-};
-
-function reducer(state, action) {
-    console.log("action", action)
-  switch (action.type) {
-    case 'select':
-      return {selectedCells: action.selectedCells};
-    case 'reset':
-      return {selectedCells: action.selectedCells};
-    default:
-      throw new Error();
-  }
+class Cell extends Component {
+    shouldComponentUpdate(nextProps, nextState) {
+        return nextProps.defaultClick !== this.props.defaultClick ||
+            nextProps.value !== this.props.value
+    }
+    render() {
+        const { value, defaultClick, onClick } = this.props;
+        return <span
+            className={defaultClick ? 'selected' : ""}
+            onClick={onClick}
+        >{value}</span>
+    }
 }
- 
 
-function Cell({ value, columnIndex, rowIndex }) {
-    const [state, dispatch] = useReducer(reducer, initialState)
-    const [selected, setSelected] = useState(false);
-
-    useEffect(()=>{
-        console.log("selectedCells", state.selectedCells);
-        setSelected(findSelected(state.selectedCells, {rowIndex, columnIndex}))
-    },[state.selectedCells, columnIndex, rowIndex])
-
-    console.log('render')
-    const handleCellClick = (e) => {
-        console.log(e.ctrlKey, state.selectedCells)
-        if (e.ctrlKey && state.selectedCells.length !== 0) {
-            const selectedCellsCoppied = [...state.selectedCells,  {rowIndex, columnIndex}]
-            console.log('selectedCellsCoppied', selectedCellsCoppied)
-            dispatch({type: 'select', selectedCells: selectedCellsCoppied})
-        } else {
-            dispatch({type: 'reset', selectedCells: [{rowIndex, columnIndex}]})
+class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            selectedCells: {},
+            items: rows,
+            loading: false
         }
     }
-    return <span
-        className={selected? 'selected': ""}
-        onClick={handleCellClick}
-    >{value}</span>
-}
 
-function App() {
-    let [selectedCells, setSelectedCells] = useState([]);
-
-    const handleSelectedChange = (e, { rowIndex, columnIndex }) => {
-        
+    handleSelectedChange = (e, { rowIndex, columnIndex }) => {
+        const { selectedCells } = this.state;
+        if (e.ctrlKey && selectedCells.length !== 0) {
+            if (findSelected(selectedCells, { rowIndex, columnIndex })) {
+                delete selectedCells[`${rowIndex}${columnIndex}`]
+            } else {
+                selectedCells[`${rowIndex}${columnIndex}`] = true;
+            }
+            this.setState({
+                selectedCells
+            })
+        } else {
+            let newObj = Object.assign({}, {
+                [`${rowIndex}${columnIndex}`]: true
+            })
+            console.log(newObj)
+            this.setState({
+                selectedCells: newObj
+            })
+        }
     }
 
-    return <div className="app">
-        <h1>This is example of {rows.length} ROWS and {columns.length} COLUMNS</h1>  
-        <Table
-            width={9999999}
-            height={1000}
-            headerHeight={50}
-            rowHeight={50}
-            rowCount={rows.length}
-            rowGetter={({ index }) => rows[index]}
-            className={'override'}
-        >
-            {columns.map(column => {
-                return <Column
-                    key={column.name}
-                    label={column.name}
-                    dataKey={column.key}
-                    width={200}
-                    cellRenderer={({ cellData, rowIndex, columnIndex }) => {
-                        return <Cell
-                            value={cellData}
-                            rowIndex={rowIndex}
-                            columnIndex={columnIndex}
-                            // defaultClick={findSelected(selectedCells, { rowIndex, columnIndex })}
-                            onClick={(e) =>console.log('hehe')}
-                        />
-                    }}
-                />
-            })}
-        </Table>
-    </div>
+    loadMore = () => {
+        this.setState({
+            loading: true
+        })
+        setTimeout(() => {
+            this.actuallyLoadMore();
+            this.setState({
+                loading: false
+            })
+        }, 500)
+        return new Promise((resolve, reject) => {
+           this.promiseResolve = resolve;
+        })
+     }
+
+     actuallyLoadMore = () => {
+        let currentLength = this.state.items.length + 1
+        let newItems = generateMoreRows(currentLength);
+        console.log('getMore')
+        this.setState({ items: this.state.items.concat(newItems)},()=>{
+            this.promiseResolve();
+        })       
+     }
+
+    render() {
+        const { selectedCells, items, loading } = this.state;
+        return <div className="app">
+            <h1>This is example of {items.length} ROWS and {columns.length} COLUMNS</h1>
+            {loading && <Spinner />}
+            <InfiniteLoader
+                isRowLoaded={({ index }) => !!this.state.items[index]}
+                loadMoreRows={this.loadMore}
+                rowCount={100000000000}
+            >
+                {({ onRowsRendered, registerChild }) => (
+                    <Table
+                        width={9999999}
+                        height={1000}
+                        headerHeight={50}
+                        rowHeight={50}
+                        rowClassName='table-row'
+                        rowCount={items.length}
+                        ref={registerChild}
+                        rowGetter={({ index }) => items[index]}
+                        onRowsRendered={onRowsRendered}
+                    >
+                        {columns.map(column => {
+                            return <Column
+                                key={column.name}
+                                label={column.name}
+                                dataKey={column.key}
+                                width={200}
+                                cellRenderer={({ cellData, rowIndex, columnIndex }) => {
+                                    const selected = findSelected(selectedCells, { rowIndex, columnIndex });
+                                    return <Cell
+                                        value={cellData}
+                                        defaultClick={selected}
+                                        onClick={(e) => this.handleSelectedChange(e, { rowIndex, columnIndex })}
+                                    />
+                                }}
+                            />
+                        })}
+                    </Table>
+                )}
+            </InfiniteLoader>
+        </div>
+    }
+
 }
 
 export default App;

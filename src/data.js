@@ -1,5 +1,6 @@
-const columnsLength = 15;
-const rowsLength = 40;
+const columnsLength = 100;
+const rowsLength = 200;
+const loadmoreRows = 200;
 
 function generateColumns() {
     let arr = [];
@@ -20,7 +21,7 @@ function generateObj(row){
     return Obj;
 }
 
-function generate1000Rows() {
+function generateRows() {
     let arr = [];
     for (let r = 0; r < rowsLength; r++) {
         let baseObj = generateObj(r);
@@ -29,10 +30,19 @@ function generate1000Rows() {
     return arr;
 }
 
+function generateMoreRows(currentLength){
+    let items = []
+    for (let i = 0; i < loadmoreRows; i++) {
+        items.push(generateObj(currentLength+i))
+    }
+    return items;
+}
+
 const columns = generateColumns();
-const rows = generate1000Rows()
+const rows = generateRows()
 
 export {
     columns,
-    rows
+    rows,
+    generateMoreRows
 }
