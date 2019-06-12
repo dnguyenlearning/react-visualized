@@ -23,18 +23,17 @@ body{
       z-index: 10000;
     }
     .ReactVirtualized__Table{
-      width: fit-content !important;
       // border-radius: 10px;
       // box-shadow: 0 0 5px white;
       // max-height: fit-content;
       // margin: 20px;
       color: white;
-      .ReactVirtualized__Table__headerRow{
-        width: 100% !important;
-      }
-      .ReactVirtualized__Table__Grid{
-        width: 100% !important;
-      }
+      // .ReactVirtualized__Table__headerRow{
+      //   width: 100% !important;
+      // }
+      // .ReactVirtualized__Table__Grid{
+      //   width: 100% !important;
+      // }
       .ReactVirtualized__Table__headerColumn{
         text-align: center;
         .ReactVirtualized__Table__headerTruncatedText{

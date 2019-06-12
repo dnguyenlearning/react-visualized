@@ -90,7 +90,7 @@ class App extends Component {
             >
                 {({ onRowsRendered, registerChild }) => (
                     <Table
-                        width={9999999}
+                        width={99999990999}
                         height={1000}
                         headerHeight={50}
                         rowHeight={50}
