@@ -9,7 +9,28 @@ body{
   height: 100%;
   background: #764ba2;
 }
+
+#feedback { font-size: 1.4em; }
+#tableWrapper .ui-selecting { background: white; color: black }
+#tableWrapper .ui-selected { background: white; color: black; }
+#tableWrapper { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+#tableWrapper li { margin: 3px; padding: 0.4em; font-size: 1.4em; height: 18px; }
+
+.ui-selectable-helper{
+  background: rgba(#667eea, 0.5)
+}
+.noselect {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
+}
+
 .app{
+    position: relative;
     h1{
       text-align: center;
       font-weight: bold;
@@ -23,17 +44,16 @@ body{
       z-index: 10000;
     }
     .ReactVirtualized__Table{
-      // border-radius: 10px;
-      // box-shadow: 0 0 5px white;
-      // max-height: fit-content;
-      // margin: 20px;
+     
       color: white;
-      // .ReactVirtualized__Table__headerRow{
-      //   width: 100% !important;
-      // }
-      // .ReactVirtualized__Table__Grid{
-      //   width: 100% !important;
-      // }
+     
+      .ReactVirtualized__Grid__innerScrollContainer{
+        position: relative;
+        #rect {
+          background: rgba(#667eea, 0.5);
+          position: absolute;
+        }
+      }
       .ReactVirtualized__Table__headerColumn{
         text-align: center;
         .ReactVirtualized__Table__headerTruncatedText{
@@ -45,10 +65,14 @@ body{
       .ReactVirtualized__Table__row{
         box-shadow: 0px 0px 1px #eee;
         .ReactVirtualized__Table__rowColumn{
+          &:first-child{
+            margin-left: 0 !important;
+          }
           height: 100%;
+          margin-right: 0 !important;
           span{
             height: 86%;
-            width: 86%;
+            width: 100%;
             display:flex;
             justify-content: center;
             align-items: center;

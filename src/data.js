@@ -1,4 +1,4 @@
-const columnsLength = 100;
+const columnsLength = 50;
 const rowsLength = 200;
 const loadmoreRows = 200;
 
